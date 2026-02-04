@@ -1,0 +1,46 @@
+{
+  "name": "@arikajs/foundation",
+  "version": "0.1.0",
+  "description": "Core application and service container layer for the ArikaJS framework.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:tests": "tsc -p tsconfig.test.json",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build",
+    "lint": "eslint src --ext .ts",
+    "test": "npm run build && npm run build:tests && node scripts/fix-test-imports.js && node --test 'dist/tests/**/*.test.js'",
+    "test:watch": "npm run build && npm run build:tests && node --test --watch 'dist/tests/**/*.test.js'",
+    "example": "npm run build && node dist/examples/basic.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "arika",
+    "arika-js",
+    "framework",
+    "foundation",
+    "dependency-injection",
+    "container",
+    "application-kernel"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arikajs/foundation.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arikajs/foundation/issues"
+  },
+  "homepage": "https://github.com/arikajs/foundation#readme",
+  "devDependencies": {
+    "@types/node": "^20.19.31",
+    "typescript": "^5.7.0"
+  },
+  "author": "Prakash Tank"
+}
