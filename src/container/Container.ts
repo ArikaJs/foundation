@@ -49,9 +49,13 @@ export class Container {
    * Resolve a token from the container.
    */
   make<T>(token: Token<T>): T {
-    const binding = this.bindings.get(token);
+    let binding = this.bindings.get(token);
 
     if (!binding) {
+      // If it's a class/constructor, try to instantiate it
+      if (typeof token === 'function') {
+        return new (token as any)(this);
+      }
       throw new Error(
         `Container: no binding found for token "${String(token)}"`,
       );

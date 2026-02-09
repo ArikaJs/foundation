@@ -328,9 +328,11 @@ Implementation details (for this package):
 Example `config/app.ts`:
 
 ```ts
+import { env } from '@arikajs/foundation';
+
 export default {
-  name: 'My Arika App',
-  env: process.env.NODE_ENV ?? 'development',
+  name: env('APP_NAME', 'My Arika App'),
+  env: env('APP_ENV', 'development'),
 };
 ```
 
@@ -339,6 +341,60 @@ Then:
 ```ts
 const appName = app.config().get('app.name');
 ```
+
+---
+
+## Environment Variables
+
+Arika Foundation provides a lightweight environment variable loader and helper, inspired by Laravel.
+
+If a `.env` file exists at the application base path, it will be automatically loaded during application bootstrap.
+
+**Example `.env`:**
+
+```env
+APP_NAME="My Arika App"
+APP_ENV=development
+APP_DEBUG=true
+```
+
+Values are injected into `process.env` and are available throughout the application lifecycle.
+
+### `env()` Helper
+
+Use the `env()` helper to safely access environment variables:
+
+```ts
+import { env } from '@arikajs/foundation';
+
+const appEnv = env('APP_ENV', 'production');
+```
+
+**Rules:**
+- Reads from `process.env`
+- Supports default values
+- Does not mutate environment variables
+
+### Using Environment Variables in Config
+
+Config files can reference environment variables directly:
+
+```ts
+// config/app.ts
+import { env } from '@arikajs/foundation';
+
+export default {
+  name: env('APP_NAME', 'Arika App'),
+  env: env('APP_ENV', 'development'),
+};
+```
+
+Configuration is resolved during application bootstrap and becomes read-only after boot.
+
+> **Important philosophy:**
+> Arika Foundation loads environment variables but does not create `.env` files.
+> Project scaffolding and `.env` generation are responsibilities of `@arikajs/cli`.
+> This distinction is key to keeping the foundation package lightweight.
 
 ---
 

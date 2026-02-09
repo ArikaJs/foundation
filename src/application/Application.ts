@@ -2,6 +2,8 @@ import * as path from 'path';
 import { Container, Token, Factory } from '../container/Container';
 import { ServiceProvider } from '../providers/ServiceProvider';
 import { Repository } from '../config/Repository';
+import { EnvLoader } from '../support/EnvLoader';
+import { setConfigRepository } from '../support/config';
 
 /**
  * Application is the core runtime of ArikaJS.
@@ -24,10 +26,16 @@ export class Application {
     this.container = new Container();
     this.configRepository = new Repository();
 
+    // Register the config repository in the global support helper
+    setConfigRepository(this.configRepository);
+
     // Register the application, container, and config for injection
     this.container.instance(Application, this);
     this.container.instance(Container, this.container);
     this.container.instance(Repository, this.configRepository);
+
+    // Load environment variables from .env if it exists
+    EnvLoader.load(this.basePath);
 
     // Load configuration from config directory
     const configPath = path.join(this.basePath, 'config');
@@ -142,6 +150,23 @@ export class Application {
    * Resolve a service from the container.
    */
   make<T>(token: Token<T>): T {
+    // If the token is already in the container, use it
+    if (this.container.has(token)) {
+      return this.container.make(token);
+    }
+
+    // Otherwise, if it's a config token (e.g. 'config.app.name'),
+    // try to resolve it from the configuration repository
+    if (typeof token === 'string' && token.startsWith('config.')) {
+      const configKey = token.substring(7);
+      const value = this.configRepository.get(configKey);
+
+      if (value !== undefined) {
+        return value as T;
+      }
+    }
+
+    // Fall back to standard container resolution (which might throw)
     return this.container.make(token);
   }
 
