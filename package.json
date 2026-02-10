@@ -38,6 +38,9 @@
     "url": "https://github.com/arikajs/foundation/issues"
   },
   "homepage": "https://github.com/arikajs/foundation#readme",
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
   "devDependencies": {
     "@types/node": "^20.19.31",
     "typescript": "^5.7.0"

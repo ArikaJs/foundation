@@ -386,6 +386,8 @@ import { env } from '@arikajs/foundation';
 export default {
   name: env('APP_NAME', 'Arika App'),
   env: env('APP_ENV', 'development'),
+  url: env('APP_URL', 'http://localhost:3000'),
+  timezone: env('APP_TIMEZONE', 'UTC'),
 };
 ```
 
@@ -395,6 +397,130 @@ Configuration is resolved during application bootstrap and becomes read-only aft
 > Arika Foundation loads environment variables but does not create `.env` files.
 > Project scaffolding and `.env` generation are responsibilities of `@arikajs/cli`.
 > This distinction is key to keeping the foundation package lightweight.
+
+---
+
+## Environment Loading & Runtime Configuration
+
+Arika Foundation provides automatic `.env` loading and runtime configuration management during application bootstrap.
+
+### .env Loader
+
+The foundation package uses `dotenv` to automatically load environment variables from a `.env` file at the application's base path.
+
+**When it loads:**
+- During application bootstrap (before service providers register)
+- Automatically searches for `.env` in the base path
+- Uses `dotenv.config({ path: basePath + '/.env' })`
+
+**Example `.env`:**
+```env
+APP_NAME="My Arika App"
+APP_ENV=development
+APP_URL=http://localhost:3000
+APP_TIMEZONE=Asia/Kolkata
+APP_DEBUG=true
+```
+
+### Config Repository
+
+The configuration repository loads config files from the `/config` directory and provides a simple API to access nested values.
+
+**Loading config files:**
+```ts
+// config/app.ts
+import { env } from '@arikajs/foundation';
+
+export default {
+  name: env('APP_NAME', 'Arika App'),
+  env: env('APP_ENV', 'development'),
+  url: env('APP_URL', 'http://localhost:3000'),
+  timezone: env('APP_TIMEZONE', 'UTC'),
+  debug: env('APP_DEBUG', false),
+};
+```
+
+**Accessing config values:**
+```ts
+import { config } from '@arikajs/foundation';
+
+// Using the config() helper
+const appName = config('app.name');
+const appUrl = config('app.url');
+const timezone = config('app.timezone');
+
+// With default values
+const debugMode = config('app.debug', false);
+```
+
+**Dot notation support:**
+- `config('app.name')` → reads `config/app.ts` → returns `name` property
+- `config('database.connections.mysql.host')` → deep nested access
+- `config('cache.default')` → reads from `config/cache.ts`
+
+### Timezone Runtime Application
+
+The foundation automatically applies the timezone from configuration to the Node.js process during the boot phase.
+
+**How it works:**
+1. Config is loaded from `config/app.ts`
+2. During boot, the timezone is read: `config('app.timezone')`
+3. Applied to the process: `process.env.TZ = config('app.timezone')`
+4. All subsequent `Date` operations use this timezone
+
+**Example:**
+```ts
+// config/app.ts
+export default {
+  timezone: env('APP_TIMEZONE', 'UTC'),
+};
+
+// After boot, all dates use the configured timezone
+const now = new Date();
+console.log(now.toString()); // Uses Asia/Kolkata if configured
+```
+
+**Where this happens:**
+- In the `Application.boot()` method or
+- In a core `AppServiceProvider.boot()` method
+
+### config() Helper
+
+The `config()` helper is a global function exported from the foundation package for easy access to configuration values.
+
+**Signature:**
+```ts
+function config(key: string, defaultValue?: any): any;
+```
+
+**Usage examples:**
+```ts
+import { config } from '@arikajs/foundation';
+
+// Simple access
+const appName = config('app.name');
+
+// With default value
+const cacheDriver = config('cache.driver', 'memory');
+
+// Nested access
+const dbHost = config('database.connections.mysql.host');
+
+// In service providers
+class MyServiceProvider extends ServiceProvider {
+  boot() {
+    const url = config('app.url');
+    console.log(`App running at: ${url}`);
+  }
+}
+```
+
+**Bootstrap flow:**
+1. `.env` file loaded → `process.env` populated
+2. Config files loaded → `env()` helper reads from `process.env`
+3. Config repository initialized → values cached
+4. Timezone applied → `process.env.TZ` set
+5. Application booted → `config()` helper ready to use
 
 ---
 

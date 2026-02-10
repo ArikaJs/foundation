@@ -105,6 +105,13 @@ export class Application {
       await provider.boot();
     }
 
+    // Phase 3: Apply runtime configuration
+    // Apply timezone from config to the Node.js process
+    const timezone = this.configRepository.get<string>('app.timezone');
+    if (timezone) {
+      process.env.TZ = timezone;
+    }
+
     // Mark config as booted (read-only)
     this.configRepository.markAsBooted();
 
