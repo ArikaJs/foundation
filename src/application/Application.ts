@@ -106,6 +106,12 @@ export class Application {
     }
 
     // Phase 3: Apply runtime configuration
+
+    // Validate APP_KEY
+    if (!this.configRepository.get('app.key')) {
+      throw new Error('Application key (APP_KEY) is not set. Please run "arika key:generate" to generate one.');
+    }
+
     // Apply timezone from config to the Node.js process
     const timezone = this.configRepository.get<string>('app.timezone');
     if (timezone) {
