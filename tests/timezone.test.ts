@@ -11,14 +11,8 @@ test('Application: applies timezone from config during boot', async (t) => {
 
     const app = new Application(__dirname);
 
-    // Mock config repository to return a timezone
-    // We can't easily load a file here without creating one, but we can inject into the repo
-    // Since Repository.config is private, we use the type assertion trick used in other tests
-    (app.config() as any).config = {
-        app: {
-            timezone: 'Asia/Kolkata'
-        }
-    };
+    app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
+    app.config().set('app.timezone', 'Asia/Kolkata');
 
     await app.boot();
 
@@ -50,6 +44,7 @@ test('Application: does not change TZ if not configured', async () => {
     const app = new Application(__dirname);
     // No config injected
 
+    app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
     await app.boot();
 
     assert.strictEqual(process.env.TZ, originalTZ); // Should remain unchanged

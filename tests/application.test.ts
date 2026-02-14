@@ -76,6 +76,7 @@ test('Application: register() accepts ServiceProvider instance', async () => {
   }
 
   app.register(new TestProvider(app));
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.strictEqual(registered, true);
@@ -94,6 +95,7 @@ test('Application: register() accepts ServiceProvider class', async () => {
   }
 
   app.register(TestProvider);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.strictEqual(registered, true);
@@ -125,6 +127,7 @@ test('Application: boot() runs all register() then all boot()', async () => {
 
   app.register(Provider1);
   app.register(Provider2);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.deepStrictEqual(order, ['register1', 'register2', 'boot1', 'boot2']);
@@ -135,13 +138,14 @@ test('Application: boot() is idempotent', async () => {
   let bootCount = 0;
 
   class TestProvider extends ServiceProvider {
-    register() {}
+    register() { }
     boot() {
       bootCount++;
     }
   }
 
   app.register(TestProvider);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
   await app.boot();
   await app.boot();
@@ -154,9 +158,10 @@ test('Application: cannot register providers after boot', async () => {
   const app = new Application(__dirname);
 
   class TestProvider extends ServiceProvider {
-    register() {}
+    register() { }
   }
 
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.throws(() => {
@@ -169,13 +174,14 @@ test('Application: run() calls boot() if not booted', async () => {
   let booted = false;
 
   class TestProvider extends ServiceProvider {
-    register() {}
+    register() { }
     boot() {
       booted = true;
     }
   }
 
   app.register(TestProvider);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.run();
 
   assert.strictEqual(booted, true);
@@ -197,6 +203,7 @@ test('Application: config loads from config directory', async () => {
   fs.writeFileSync(path.join(configDir, 'app.js'), configContent);
 
   const app = new Application(tmpDir);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   const name = app.config().get('app.name');
@@ -208,6 +215,7 @@ test('Application: config loads from config directory', async () => {
 
 test('Application: config is read-only after boot', async () => {
   const app = new Application(__dirname);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.throws(() => {

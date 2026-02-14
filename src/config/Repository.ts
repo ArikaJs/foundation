@@ -77,6 +77,29 @@ export class Repository {
   }
 
   /**
+   * Set a configuration value using dot notation.
+   * Example: set('app.key', 'value')
+   */
+  set(key: string, value: any): void {
+    if (this.booted) {
+      throw new Error('Configuration cannot be modified after boot.');
+    }
+
+    const keys = key.split('.');
+    let current = this.config;
+
+    for (let i = 0; i < keys.length - 1; i++) {
+      const k = keys[i];
+      if (!(k in current) || typeof current[k] !== 'object' || current[k] === null) {
+        current[k] = {};
+      }
+      current = current[k];
+    }
+
+    current[keys[keys.length - 1]] = value;
+  }
+
+  /**
    * Get all configuration.
    */
   all(): Record<string, any> {

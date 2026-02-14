@@ -14,6 +14,7 @@ test('ServiceProvider: register() is called during boot', async () => {
   }
 
   app.register(TestProvider);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.strictEqual(registered, true);
@@ -31,6 +32,7 @@ test('ServiceProvider: boot() is optional', async () => {
   app.register(TestProvider);
 
   // Should not throw
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 });
 
@@ -57,6 +59,7 @@ test('ServiceProvider: boot() can access other services', async () => {
 
   app.register(ServiceProvider1);
   app.register(ServiceProvider2);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.strictEqual(serviceResolved, true);
@@ -74,6 +77,7 @@ test('ServiceProvider: register() can be async', async () => {
   }
 
   app.register(TestProvider);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.strictEqual(registered, true);
@@ -84,7 +88,7 @@ test('ServiceProvider: boot() can be async', async () => {
   let booted = false;
 
   class TestProvider extends ServiceProvider {
-    register() {}
+    register() { }
 
     async boot() {
       await new Promise((resolve) => setTimeout(resolve, 10));
@@ -93,6 +97,7 @@ test('ServiceProvider: boot() can be async', async () => {
   }
 
   app.register(TestProvider);
+  app.config().set('app.key', 'base64:sm957Y1wUYo8Uj8yL1fD7vX+X6y8gG+E6XpXnJz+I=');
   await app.boot();
 
   assert.strictEqual(booted, true);
