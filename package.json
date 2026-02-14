@@ -39,13 +39,13 @@
   },
   "homepage": "https://github.com/arikajs/foundation#readme",
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
     "@arikajs/logging": "file:../logging",
     "@arikajs/http": "file:../http",
     "@arikajs/database": "file:../database",
-    "@arikajs/cache": "file:../cache"
-  },
-  "devDependencies": {
+    "@arikajs/cache": "file:../cache",
     "@types/node": "^20.19.31",
     "typescript": "^5.7.0"
   },
