@@ -1,4 +1,4 @@
-import { Application } from '../application/Application';
+import { Application } from '../contracts/Application';
 
 /**
  * Base class for service providers in ArikaJS.
@@ -8,8 +8,8 @@ import { Application } from '../application/Application';
  * - register(): Bind services to the container (no heavy side-effects)
  * - boot(): Perform runtime logic after all providers are registered
  */
-export abstract class ServiceProvider {
-  constructor(protected readonly app: Application) {}
+export abstract class ServiceProvider<T extends Application = Application> {
+  constructor(protected readonly app: T) { }
 
   /**
    * Register services to the container.

@@ -1,5 +1,5 @@
 // Application
-export * from './application/Application';
+export { Application } from './application/Application';
 
 // Container
 export * from './container/Container';
@@ -11,7 +11,8 @@ export * from './providers/ServiceProvider';
 export * from './config/Repository';
 
 // Contracts
-export * from './contracts/Kernel';
+export { Application as ApplicationContract } from './contracts/Application';
+export { Kernel as KernelContract } from './contracts/Kernel';
 
 // Support
 export * from './support/env';
