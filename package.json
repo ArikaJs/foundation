@@ -42,10 +42,10 @@
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
-    "@arikajs/logging": "file:../logging",
-    "@arikajs/http": "file:../http",
-    "@arikajs/database": "file:../database",
-    "@arikajs/cache": "file:../cache",
+    "@arikajs/logging": "^0.1.0",
+    "@arikajs/http": "^0.1.0",
+    "@arikajs/database": "^0.1.0",
+    "@arikajs/cache": "^0.1.0",
     "@types/node": "^20.19.31",
     "typescript": "^5.7.0"
   },
