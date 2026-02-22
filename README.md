@@ -21,7 +21,7 @@ app.boot();
 app.run();
 ```
 
-Arika Foundation is to ArikaJS what `illuminate/foundation` is to Laravel: everything else in the framework sits on top of this.
+Arika Foundation is the cornerstone of ArikaJS: everything else in the framework sits on top of this.
 
 ---
 
@@ -59,7 +59,7 @@ The goal of this package is to stay **small, focused, and stable**, forming the 
   - Resolve services by string token or class
 
 - **Service Provider System**
-  - Laravel-style `ServiceProvider` abstraction
+  - Elegant `ServiceProvider` abstraction
   - `register()` for bindings
   - `boot()` for runtime logic
   - Deterministic order: all `register()` run before any `boot()`
@@ -346,7 +346,7 @@ const appName = app.config().get('app.name');
 
 ## Environment Variables
 
-Arika Foundation provides a lightweight environment variable loader and helper, inspired by Laravel.
+Arika Foundation provides a lightweight environment variable loader and helper, with a fluent API.
 
 If a `.env` file exists at the application base path, it will be automatically loaded during application bootstrap.
 
@@ -599,3 +599,26 @@ Before submitting a PR:
 ## License
 
 `@arikajs/foundation` is open-sourced software licensed under the **MIT license**.
+
+## 🏗 Architecture
+
+```text
+foundation/
+├── src/
+│   ├── application
+│   │   └── Application.ts
+│   ├── container
+│   │   └── Container.ts
+│   ├── contracts
+│   │   ├── Application.ts
+│   │   └── Kernel.ts
+│   ├── providers
+│   │   └── ServiceProvider.ts
+│   ├── support
+│   └── index.ts
+├── tests/
+├── package.json
+├── tsconfig.json
+└── README.md
+```
+
