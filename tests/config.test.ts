@@ -3,7 +3,7 @@ import assert from 'node:assert';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { Repository } from '../src/config/Repository';
+import { Repository } from '@arikajs/config';
 
 test('Repository: get() returns undefined for missing key', () => {
   const repo = new Repository();

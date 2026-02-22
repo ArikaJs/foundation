@@ -11,7 +11,7 @@
     "clean": "rm -rf dist",
     "prepare": "echo skip",
     "lint": "eslint src --ext .ts",
-    "test": "npm run build && npm run build:tests && node scripts/fix-test-imports.js && node --test 'dist/tests/**/*.test.js'",
+    "test": "npm run build && npm run build:tests && node --test 'dist/tests/**/*.test.js'",
     "test:watch": "npm run build && npm run build:tests && node --test --watch 'dist/tests/**/*.test.js'",
     "example": "npm run build && node dist/examples/basic.js"
   },
@@ -39,7 +39,7 @@
   },
   "homepage": "https://github.com/arikajs/foundation#readme",
   "dependencies": {
-    "dotenv": "^16.4.7"
+    "@arikajs/config": "file:../config"
   },
   "devDependencies": {
     "@arikajs/logging": "file:../logging",

@@ -3,8 +3,7 @@ import assert from 'node:assert';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import { EnvLoader } from '../src/support/EnvLoader';
-import { env } from '../src/support/env';
+import { EnvLoader, env } from '@arikajs/config';
 import { Application } from '../src/application/Application';
 
 test('env(): returns value from process.env', () => {

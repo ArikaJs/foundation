@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
 import { Application } from '../src/application/Application';
-import { config } from '../src/support/config';
+import { config } from '@arikajs/config';
 
 test('config(): returns value from repository', () => {
     const app = new Application(__dirname);

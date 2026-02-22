@@ -12,7 +12,7 @@ import { Application, ServiceProvider } from '../src';
 
 // Define a simple logger service
 class Logger {
-  constructor(private prefix: string) {}
+  constructor(private prefix: string) { }
 
   log(message: string): void {
     console.log(`[${this.prefix}] ${message}`);
@@ -31,7 +31,7 @@ class CoreServiceProvider extends ServiceProvider {
   register(): void {
     // Register logger as singleton
     this.app.singleton(Logger, () => {
-      const config = this.app.config().get<AppConfig>('app', {
+      const config = this.app.config().get('app', {
         name: 'ArikaJS App',
         version: '0.1.0',
         env: 'development',
@@ -45,7 +45,7 @@ class CoreServiceProvider extends ServiceProvider {
     });
 
     // Register app config
-    this.app.instance<AppConfig>('config.app', {
+    this.app.instance('config.app', {
       name: 'ArikaJS Foundation Example',
       version: '0.1.0',
       env: process.env.NODE_ENV || 'development',

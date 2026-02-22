@@ -1,9 +1,7 @@
 import * as path from 'path';
 import { Container, Token, Factory } from '../container/Container';
 import { ServiceProvider } from '../providers/ServiceProvider';
-import { Repository } from '../config/Repository';
-import { EnvLoader } from '../support/EnvLoader';
-import { setConfigRepository } from '../support/config';
+import { Repository, EnvLoader, setConfigRepository } from '@arikajs/config';
 
 /**
  * Application is the core runtime of ArikaJS.
@@ -81,8 +79,13 @@ export class Application {
    * Alias for make() - resolves a service from the container.
    */
   make<T>(token: Token<T>): T {
+    // Check the container first — explicit bindings always win
+    if (this.container.has(token)) {
+      return this.container.make(token);
+    }
+
     // If it's a config token (e.g. 'config.app.name'),
-    // try to resolve it from the configuration repository
+    // fall back to the configuration repository
     if (typeof token === 'string' && token.startsWith('config.')) {
       const configKey = token.substring(7);
       const value = this.configRepository.get(configKey);
@@ -92,6 +95,7 @@ export class Application {
       }
     }
 
+    // Final attempt — let the container throw if not found
     return this.container.make(token);
   }
 
