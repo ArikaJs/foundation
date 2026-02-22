@@ -212,6 +212,12 @@ export class Application {
 
     // Phase 3: Apply runtime configuration
 
+    // Re-apply timezone in case it was changed after construction
+    const timezone = this.configRepository.get<string>('app.timezone');
+    if (timezone) {
+      process.env.TZ = timezone;
+    }
+
     // Validate APP_KEY (unless in debug/local mode)
     if (!this.configRepository.get('app.key') && process.env.NODE_ENV === 'production') {
       throw new Error('Application key (APP_KEY) is not set. Please run "arika key:generate" to generate one.');
