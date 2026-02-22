@@ -20,11 +20,15 @@ export class Application {
   private readonly configRepository: Repository;
   private providers: ServiceProvider[] = [];
   private booted = false;
+  private static instance: Application | null = null;
+  private terminatingCallbacks: (() => void | Promise<void>)[] = [];
 
   constructor(basePath: string) {
     this.basePath = path.resolve(basePath);
     this.container = new Container();
     this.configRepository = new Repository();
+
+    Application.instance = this;
 
     // Register the config repository in the global support helper
     setConfigRepository(this.configRepository);
@@ -40,6 +44,16 @@ export class Application {
     // Load configuration from config directory
     const configPath = path.join(this.basePath, 'config');
     this.configRepository.loadConfigDirectory(configPath);
+  }
+
+  /**
+   * Get the globally available application instance.
+   */
+  public static getInstance(): Application {
+    if (!this.instance) {
+      throw new Error('Application instance has not been created yet.');
+    }
+    return this.instance;
   }
 
   /**
@@ -61,6 +75,73 @@ export class Application {
    */
   config(): Repository {
     return this.configRepository;
+  }
+
+  /**
+   * Alias for make() - resolves a service from the container.
+   */
+  make<T>(token: Token<T>): T {
+    // If it's a config token (e.g. 'config.app.name'),
+    // try to resolve it from the configuration repository
+    if (typeof token === 'string' && token.startsWith('config.')) {
+      const configKey = token.substring(7);
+      const value = this.configRepository.get(configKey);
+
+      if (value !== undefined) {
+        return value as T;
+      }
+    }
+
+    return this.container.make(token);
+  }
+
+  /**
+   * Bind a transient service.
+   */
+  bind<T>(token: Token<T>, factory: Factory<T>): void {
+    this.container.bind(token, factory);
+  }
+
+  /**
+   * Bind a singleton service.
+   */
+  singleton<T>(token: Token<T>, factory: Factory<T>): void {
+    this.container.singleton(token, factory);
+  }
+
+  /**
+   * Register an existing instance.
+   */
+  instance<T>(token: Token<T>, value: T): void {
+    this.container.instance(token, value);
+  }
+
+  /**
+   * Register an alias for a token.
+   */
+  alias(token: Token, alias: Token): void {
+    this.container.alias(token, alias);
+  }
+
+  /**
+   * Tag a token.
+   */
+  tag(token: Token, tag: string): void {
+    this.container.tag(token, tag);
+  }
+
+  /**
+   * Resolve all tagged services.
+   */
+  tagged<T = any>(tag: string): T[] {
+    return this.container.tagged<T>(tag);
+  }
+
+  /**
+   * Extend a service.
+   */
+  extend<T = any>(token: Token<T>, callback: (instance: T) => T): void {
+    this.container.extend(token, callback);
   }
 
   /**
@@ -107,8 +188,8 @@ export class Application {
 
     // Phase 3: Apply runtime configuration
 
-    // Validate APP_KEY
-    if (!this.configRepository.get('app.key')) {
+    // Validate APP_KEY (unless in debug/local mode)
+    if (!this.configRepository.get('app.key') && process.env.NODE_ENV === 'production') {
       throw new Error('Application key (APP_KEY) is not set. Please run "arika key:generate" to generate one.');
     }
 
@@ -126,68 +207,41 @@ export class Application {
 
   /**
    * Run the application.
-   * This is intentionally minimal in foundation - higher layers
-   * (HTTP/CLI) will override or extend this behavior.
    */
   async run(): Promise<void> {
     if (!this.booted) {
       await this.boot();
     }
-
-    // In foundation, run() is a no-op
-    // HTTP/CLI kernels will implement actual run logic
   }
 
   /**
-   * Bind a transient service.
+   * Gracefully terminate the application.
    */
-  bind<T>(token: Token<T>, factory: Factory<T>): void {
-    this.container.bind(token, factory);
-  }
-
-  /**
-   * Bind a singleton service.
-   */
-  singleton<T>(token: Token<T>, factory: Factory<T>): void {
-    this.container.singleton(token, factory);
-  }
-
-  /**
-   * Register an existing instance.
-   */
-  instance<T>(token: Token<T>, value: T): void {
-    this.container.instance(token, value);
-  }
-
-  /**
-   * Resolve a service from the container.
-   */
-  make<T>(token: Token<T>): T {
-    // If the token is already in the container, use it
-    if (this.container.has(token)) {
-      return this.container.make(token);
+  async terminate(): Promise<void> {
+    for (const callback of this.terminatingCallbacks) {
+      await callback();
     }
+  }
 
-    // Otherwise, if it's a config token (e.g. 'config.app.name'),
-    // try to resolve it from the configuration repository
-    if (typeof token === 'string' && token.startsWith('config.')) {
-      const configKey = token.substring(7);
-      const value = this.configRepository.get(configKey);
-
-      if (value !== undefined) {
-        return value as T;
-      }
-    }
-
-    // Fall back to standard container resolution (which might throw)
-    return this.container.make(token);
+  /**
+   * Register a callback to be run when the application is terminating.
+   */
+  onTerminate(callback: () => void | Promise<void>): void {
+    this.terminatingCallbacks.push(callback);
   }
 
   /**
    * Alias for make() - resolves a service from the container.
    */
   resolve<T>(token: Token<T>): T {
-    return this.container.resolve(token);
+    return this.make(token);
+  }
+
+  /**
+   * Check if a service is registered in the container.
+   */
+  has(token: Token): boolean {
+    return this.container.has(token);
   }
 
   /**

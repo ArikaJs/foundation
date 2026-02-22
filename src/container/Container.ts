@@ -18,6 +18,9 @@ interface Binding<T = any> {
  */
 export class Container {
   private bindings = new Map<Token, Binding>();
+  private aliases = new Map<Token, Token>();
+  private tags = new Map<string, Token[]>();
+  private extenders = new Map<Token, ((instance: any) => any)[]>();
 
   /**
    * Bind a token to a factory. Produces a new instance on every resolution.
@@ -46,29 +49,83 @@ export class Container {
   }
 
   /**
+   * Create an alias for a token.
+   */
+  alias(token: Token, alias: Token): void {
+    this.aliases.set(alias, token);
+  }
+
+  /**
+   * Assign a tag to a given token.
+   */
+  tag(token: Token, tag: string): void {
+    if (!this.tags.has(tag)) {
+      this.tags.set(tag, []);
+    }
+    this.tags.get(tag)?.push(token);
+  }
+
+  /**
+   * Resolve all bindings associated with a given tag.
+   */
+  tagged<T = any>(tag: string): T[] {
+    const tokens = this.tags.get(tag) || [];
+    return tokens.map(token => this.make<T>(token));
+  }
+
+  /**
+   * Extend a binding in the container.
+   */
+  extend<T = any>(token: Token<T>, callback: (instance: T) => T): void {
+    const originalToken = this.getAlias(token);
+    if (!this.extenders.has(originalToken)) {
+      this.extenders.set(originalToken, []);
+    }
+    this.extenders.get(originalToken)?.push(callback);
+  }
+
+  /**
    * Resolve a token from the container.
    */
   make<T>(token: Token<T>): T {
-    let binding = this.bindings.get(token);
+    const originalToken = this.getAlias(token);
+    let binding = this.bindings.get(originalToken);
 
     if (!binding) {
-      // If it's a class/constructor, try to instantiate it
-      if (typeof token === 'function') {
-        return new (token as any)(this);
+      if (typeof originalToken === 'function') {
+        return this.instantiate(originalToken as any);
       }
-      throw new Error(
-        `Container: no binding found for token "${String(token)}"`,
-      );
+      throw new Error(`Container: no binding found for token "${String(token)}"`);
     }
 
+    let instance: T;
     if (binding.singleton) {
       if (binding.instance === undefined) {
         binding.instance = binding.factory(this);
+        binding.instance = this.applyExtenders(originalToken, binding.instance);
       }
-      return binding.instance as T;
+      instance = binding.instance as T;
+    } else {
+      instance = binding.factory(this);
+      instance = this.applyExtenders(originalToken, instance);
     }
 
-    return binding.factory(this);
+    return instance;
+  }
+
+  private getAlias(token: Token): Token {
+    return this.aliases.get(token) || token;
+  }
+
+  private applyExtenders(token: Token, instance: any): any {
+    const extenders = this.extenders.get(token) || [];
+    return extenders.reduce((inst, extender) => extender(inst), instance);
+  }
+
+  private instantiate(constructor: new (...args: any[]) => any): any {
+    // Basic automatic injection (assumes constructor only takes container)
+    // In the future, this will use Reflect metadata for property/param injection
+    return new constructor(this);
   }
 
   /**
@@ -82,6 +139,6 @@ export class Container {
    * Check whether a token has been registered.
    */
   has(token: Token): boolean {
-    return this.bindings.has(token);
+    return this.bindings.has(this.getAlias(token));
   }
 }
