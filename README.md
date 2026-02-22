@@ -540,25 +540,27 @@ export interface Kernel {
 Higher-level packages (e.g. `@arikajs/http`, `@arikajs/cli`) will implement these interfaces and plug into the `Application` lifecycle.
 
 ---
+## 🏗 Architecture
 
-## Project Structure (recommended)
-
-Inside the `arika-foundation` repository:
-
-- `src/`
-  - `application/`
-    - `Application.ts` – core application class and lifecycle
-  - `container/`
-    - `Container.ts` – service container implementation
-  - `providers/`
-    - `ServiceProvider.ts` – base service provider abstraction
-  - `config/`
-    - `Repository.ts` – configuration repository
-  - `contracts/`
-    - `Kernel.ts` – kernel interface(s)
-  - `index.ts` – public exports
-- `tests/`
-  - Unit tests for container, providers, config, and application lifecycle
+```text
+foundation/
+├── src/
+│   ├── application
+│   │   └── Application.ts
+│   ├── container
+│   │   └── Container.ts
+│   ├── contracts
+│   │   ├── Application.ts
+│   │   └── Kernel.ts
+│   ├── providers
+│   │   └── ServiceProvider.ts
+│   ├── support
+│   └── index.ts
+├── tests/
+├── package.json
+├── tsconfig.json
+└── README.md
+```
 
 Your ArikaJS apps that consume this package will typically have:
 
@@ -599,26 +601,3 @@ Before submitting a PR:
 ## License
 
 `@arikajs/foundation` is open-sourced software licensed under the **MIT license**.
-
-## 🏗 Architecture
-
-```text
-foundation/
-├── src/
-│   ├── application
-│   │   └── Application.ts
-│   ├── container
-│   │   └── Container.ts
-│   ├── contracts
-│   │   ├── Application.ts
-│   │   └── Kernel.ts
-│   ├── providers
-│   │   └── ServiceProvider.ts
-│   ├── support
-│   └── index.ts
-├── tests/
-├── package.json
-├── tsconfig.json
-└── README.md
-```
-
