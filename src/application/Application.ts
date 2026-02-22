@@ -56,6 +56,12 @@ export class Application {
       const configPath = path.join(this.basePath, 'config');
       this.configRepository.loadConfigDirectory(configPath);
     }
+
+    // Apply timezone from config to the Node.js process
+    const timezone = this.configRepository.get<string>('app.timezone');
+    if (timezone) {
+      process.env.TZ = timezone;
+    }
   }
 
   /**
@@ -209,12 +215,6 @@ export class Application {
     // Validate APP_KEY (unless in debug/local mode)
     if (!this.configRepository.get('app.key') && process.env.NODE_ENV === 'production') {
       throw new Error('Application key (APP_KEY) is not set. Please run "arika key:generate" to generate one.');
-    }
-
-    // Apply timezone from config to the Node.js process
-    const timezone = this.configRepository.get<string>('app.timezone');
-    if (timezone) {
-      process.env.TZ = timezone;
     }
 
     // Mark config as booted (read-only)
