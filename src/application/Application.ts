@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import { Container, Token, Factory } from '../container/Container';
 import { ServiceProvider } from '../providers/ServiceProvider';
@@ -39,9 +40,22 @@ export class Application {
     // Load environment variables from .env if it exists
     EnvLoader.load(this.basePath);
 
-    // Load configuration from config directory
-    const configPath = path.join(this.basePath, 'config');
-    this.configRepository.loadConfigDirectory(configPath);
+    // Load configuration
+    const cachedConfigPath = path.join(this.basePath, 'bootstrap', 'cache', 'config.json');
+
+    if (fs.existsSync(cachedConfigPath)) {
+      try {
+        const cachedData = fs.readFileSync(cachedConfigPath, 'utf8');
+        this.configRepository = new Repository(JSON.parse(cachedData));
+      } catch (e) {
+        console.error('Failed to load cached config, falling back to directory loading...', e);
+        const configPath = path.join(this.basePath, 'config');
+        this.configRepository.loadConfigDirectory(configPath);
+      }
+    } else {
+      const configPath = path.join(this.basePath, 'config');
+      this.configRepository.loadConfigDirectory(configPath);
+    }
   }
 
   /**
